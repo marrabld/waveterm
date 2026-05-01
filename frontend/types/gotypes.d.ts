@@ -1019,6 +1019,7 @@ declare global {
         connections: {[key: string]: ConnKeywords};
         bookmarks: {[key: string]: WebBookmark};
         waveai: {[key: string]: AIModeConfigType};
+        keybindings: {[key: string]: KeybindingConfigType};
         configerrors: ConfigError[];
         version: string;
         buildtime: string;
@@ -1055,6 +1056,13 @@ declare global {
     type JobManagerStatusUpdate = {
         jobid: string;
         jobmanagerstatus: string;
+    };
+
+    // wconfig.KeybindingConfigType
+    type KeybindingConfigType = {
+        key?: string;
+        disabled?: boolean;
+        blockdef?: BlockDef;
     };
 
     // waveobj.LayoutActionData
@@ -1589,6 +1597,7 @@ declare global {
         "debug:panictype"?: string;
         "block:view"?: string;
         "block:controller"?: string;
+        "block:subblock"?: boolean;
         "ai:backendtype"?: string;
         "ai:local"?: boolean;
         "wsh:cmd"?: string;

@@ -6,6 +6,7 @@ import { loadMonaco } from "@/app/monaco/monaco-env";
 import { loadBadges } from "@/app/store/badge";
 import { GlobalModel } from "@/app/store/global-model";
 import {
+    applyKeybindingConfig,
     globalRefocus,
     registerBuilderGlobalKeys,
     registerControlShiftStateUpdateHandler,
@@ -194,6 +195,10 @@ async function initWave(initOpts: WaveInitOpts) {
     const fullConfig = await RpcApi.GetFullConfigCommand(TabRpcClient);
     console.log("fullconfig", fullConfig);
     globalStore.set(atoms.fullConfigAtom, fullConfig);
+    // Apply user keybinding overrides now that config is loaded.
+    // registerGlobalKeys() ran before this point (fullConfigAtom was null then),
+    // so we explicitly re-apply here to pick up any keybindings.json entries.
+    applyKeybindingConfig(fullConfig?.keybindings);
     const waveaiModeConfig = await RpcApi.GetWaveAIModeConfigCommand(TabRpcClient);
     globalStore.set(atoms.waveaiModeConfigAtom, waveaiModeConfig.configs);
     console.log("Wave First Render");
