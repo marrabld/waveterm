@@ -190,6 +190,8 @@ You can bind a key to open a new block directly, without using a named action. S
 
 The action name is just a user-defined label (it can be anything) and does not need to match a built-in action.
 
+For web and preview blocks, only `view` (and `url` or `file`) are needed. For terminal blocks that run a specific command, you must also set `"controller": "cmd"`:
+
 ```json
 {
   "my:browser": {
@@ -200,12 +202,47 @@ The action name is just a user-defined label (it can be anything) and does not n
     "key": "Ctrl:Shift:n",
     "blockdef": { "meta": { "view": "preview", "file": "~/notes.md" } }
   },
-  "my:terminal": {
+  "my:emacs": {
     "key": "Ctrl:Shift:e",
-    "blockdef": { "meta": { "view": "term" } }
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "emacs",
+        "cmd:args": ["-nw"],
+        "cmd:interactive": true
+      }
+    }
+  },
+  "my:ncdu": {
+    "key": "Ctrl:Shift:u",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "ncdu",
+        "cmd:args": ["~"],
+        "cmd:interactive": true
+      }
+    }
+  },
+  "my:upgrade": {
+    "key": "Ctrl:Shift:a",
+    "blockdef": {
+      "meta": {
+        "view": "term",
+        "controller": "cmd",
+        "cmd": "sudo apt update && sudo apt dist-upgrade; exec bash",
+        "cmd:shell": true
+      }
+    }
   }
 }
 ```
+
+Without `"controller": "cmd"`, a terminal block will open but remain blank — no command will run.
+
+Use `"cmd:shell": true` when your command contains shell syntax like `&&`, pipes, or redirections. Use `"cmd:args"` for simple argument lists. Add `"cmd:interactive": true` for TUI apps (emacs, ncdu, superfile, etc.) that need an interactive terminal.
 
 If a `blockdef` entry uses the same key as a built-in action, the `blockdef` takes precedence.
 
