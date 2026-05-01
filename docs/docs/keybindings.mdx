@@ -190,27 +190,29 @@ You can bind a key to open a new block directly, without using a named action. S
 
 The action name is just a user-defined label (it can be anything) and does not need to match a built-in action.
 
-For web and preview blocks, only `view` (and `url` or `file`) are needed. For terminal blocks that run a specific command, you must also set `"controller": "cmd"`:
+For web and preview blocks, only `view` (and `url` or `file`) are needed. For terminal blocks there are two controller types depending on the use case:
+
+| Controller                                   | Use for                            | Notes                                                     |
+| -------------------------------------------- | ---------------------------------- | --------------------------------------------------------- |
+| `"controller": "shell"` + `"cmd:initscript"` | TUI apps (emacs, ncdu, htop, etc.) | Full PTY shell session — required for interactive apps    |
+| `"controller": "cmd"` + `"cmd"`              | Non-interactive commands           | Simpler exec path; use `cmd:shell: true` for shell syntax |
+
+Without a `controller` field, a terminal block will open but remain blank — no command will run.
+
+#### TUI apps (emacs, ncdu, superfile, etc.)
+
+Use `"controller": "shell"` with `"cmd:initscript"` for any app that takes over the terminal (a TUI). This gives a full PTY shell session. Add `"cmd:closeonexit": true` to close the block when you quit the app.
 
 ```json
 {
-  "my:browser": {
-    "key": "Ctrl:Shift:b",
-    "blockdef": { "meta": { "view": "web", "url": "https://google.com" } }
-  },
-  "my:notes": {
-    "key": "Ctrl:Shift:n",
-    "blockdef": { "meta": { "view": "preview", "file": "~/notes.md" } }
-  },
   "my:emacs": {
     "key": "Ctrl:Shift:e",
     "blockdef": {
       "meta": {
         "view": "term",
-        "controller": "cmd",
-        "cmd": "emacs",
-        "cmd:args": ["-nw"],
-        "cmd:interactive": true
+        "controller": "shell",
+        "cmd:initscript": "emacs -nw",
+        "cmd:closeonexit": true
       }
     }
   },
@@ -219,12 +221,28 @@ For web and preview blocks, only `view` (and `url` or `file`) are needed. For te
     "blockdef": {
       "meta": {
         "view": "term",
-        "controller": "cmd",
-        "cmd": "ncdu",
-        "cmd:args": ["~"],
-        "cmd:interactive": true
+        "controller": "shell",
+        "cmd:initscript": "ncdu ~",
+        "cmd:closeonexit": true
       }
     }
+  }
+}
+```
+
+#### Non-interactive commands
+
+Use `"controller": "cmd"` for commands that run and produce output. Use `"cmd:shell": true` when the command contains shell syntax like `&&`, pipes, or redirections. Add `"; exec bash"` at the end to keep the block open so you can read the output.
+
+```json
+{
+  "my:notes": {
+    "key": "Ctrl:Shift:n",
+    "blockdef": { "meta": { "view": "preview", "file": "~/notes.md" } }
+  },
+  "my:browser": {
+    "key": "Ctrl:Shift:b",
+    "blockdef": { "meta": { "view": "web", "url": "https://google.com" } }
   },
   "my:upgrade": {
     "key": "Ctrl:Shift:a",
@@ -239,10 +257,6 @@ For web and preview blocks, only `view` (and `url` or `file`) are needed. For te
   }
 }
 ```
-
-Without `"controller": "cmd"`, a terminal block will open but remain blank — no command will run.
-
-Use `"cmd:shell": true` when your command contains shell syntax like `&&`, pipes, or redirections. Use `"cmd:args"` for simple argument lists. Add `"cmd:interactive": true` for TUI apps (emacs, ncdu, superfile, etc.) that need an interactive terminal.
 
 If a `blockdef` entry uses the same key as a built-in action, the `blockdef` takes precedence.
 
