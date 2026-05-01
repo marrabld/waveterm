@@ -1,0 +1,159 @@
+// Copyright 2025, Command Line Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+.commandpalette-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 80px;
+    z-index: var(--zindex-modal-wrapper);
+    background: transparent;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.commandpalette {
+    position: relative;
+    z-index: var(--zindex-modal);
+    width: 560px;
+    max-width: calc(100vw - 48px);
+    font: var(--fixed-font);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: var(--modal-bg-color);
+    display: flex;
+    flex-direction: column;
+    // sharp corners — no border-radius
+}
+
+.commandpalette-input-row {
+    display: flex;
+    align-items: center;
+    padding: 7px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 6px;
+}
+
+.commandpalette-prompt {
+    color: var(--accent-color);
+    font: var(--fixed-font);
+    font-size: 13px;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.commandpalette-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--main-text-color);
+    font: var(--fixed-font);
+    font-size: 13px;
+    line-height: 1.5;
+    caret-color: var(--main-text-color);
+
+    // blinking block cursor feel
+    caret-shape: block;
+
+    &::placeholder {
+        color: var(--secondary-text-color);
+        opacity: 0.5;
+    }
+}
+
+.commandpalette-list {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.12);
+    }
+}
+
+.commandpalette-empty {
+    padding: 10px;
+    color: var(--secondary-text-color);
+    font: var(--fixed-font);
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.commandpalette-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    padding: 0 10px;
+    cursor: default;
+    gap: 8px;
+
+    // terminal-style selection: invert text instead of accent fill
+    &.selected {
+        background: var(--main-text-color);
+
+        .commandpalette-label {
+            color: var(--modal-bg-color);
+        }
+
+        .commandpalette-key {
+            color: var(--modal-bg-color);
+            opacity: 0.6;
+        }
+
+        .commandpalette-badge.custom {
+            background: transparent;
+            color: var(--modal-bg-color);
+            border-color: var(--modal-bg-color);
+            opacity: 0.7;
+        }
+    }
+}
+
+.commandpalette-label {
+    font: var(--fixed-font);
+    font-size: 13px;
+    color: var(--main-text-color);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.commandpalette-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.commandpalette-key {
+    font: var(--fixed-font);
+    font-size: 11px;
+    color: var(--secondary-text-color);
+    opacity: 0.6;
+    white-space: nowrap;
+    // no border, no background — plain dim text like a terminal hint
+}
+
+.commandpalette-badge {
+    font: var(--fixed-font);
+    font-size: 10px;
+    border-radius: 0;
+    padding: 1px 4px;
+    text-transform: lowercase;
+    letter-spacing: 0.03em;
+
+    &.custom {
+        background: transparent;
+        color: rgba(100, 180, 255, 0.75);
+        border: 1px solid rgba(100, 180, 255, 0.3);
+    }
+}

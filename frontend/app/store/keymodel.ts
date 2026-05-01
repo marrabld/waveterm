@@ -756,6 +756,10 @@ function registerActionHandlers() {
         WorkspaceLayoutModel.getInstance().setAIPanelVisible(!currentVisible);
         return true;
     });
+    reg("app:command-palette", "Ctrl:Shift:p", () => {
+        modalsModel.pushModal("CommandPaletteModal");
+        return true;
+    });
 }
 
 // applyKeybindingConfig rebuilds globalKeyMap by taking the defaults from
@@ -868,11 +872,43 @@ function getAllGlobalKeyBindings(): string[] {
     return allKeys;
 }
 
+// getCommandPaletteItems returns all registered actions with their effective key bindings,
+// accounting for any user overrides in keybindings.json. Used by the command palette.
+function getCommandPaletteItems(): Array<{ action: string; key: string; isCustom: boolean }> {
+    const fullConfig = globalStore.get(atoms.fullConfigAtom);
+    const overrides = fullConfig?.keybindings ?? {};
+    const items: Array<{ action: string; key: string; isCustom: boolean }> = [];
+
+    // built-in actions from actionRegistry (with user key overrides applied)
+    for (const { action, key } of defaultKeyBindings) {
+        const override = overrides[action];
+        if (override?.disabled) continue;
+        items.push({ action, key: override?.key ?? key, isCustom: false });
+    }
+
+    // user-defined blockdef actions (my:* entries with no built-in handler)
+    for (const [action, cfg] of Object.entries(overrides)) {
+        if (cfg.blockdef && cfg.key && !cfg.disabled && !actionRegistry.has(action)) {
+            items.push({ action, key: cfg.key, isCustom: true });
+        }
+    }
+
+    return items;
+}
+
+// runAction executes a named action from the actionRegistry without a keyboard event.
+function runAction(action: string): boolean {
+    const handler = actionRegistry.get(action);
+    if (!handler) return false;
+    return handler(null as any);
+}
+
 export {
     appHandleKeyDown,
     applyKeybindingConfig,
     disableGlobalKeybindings,
     enableGlobalKeybindings,
+    getCommandPaletteItems,
     getSimpleControlShiftAtom,
     globalRefocus,
     globalRefocusWithTimeout,
@@ -880,6 +916,7 @@ export {
     registerControlShiftStateUpdateHandler,
     registerElectronReinjectKeyHandler,
     registerGlobalKeys,
+    runAction,
     tryReinjectKey,
     unsetControlShift,
     uxCloseBlock,
